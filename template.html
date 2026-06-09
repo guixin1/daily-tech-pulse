@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日前沿 - Daily Tech Pulse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>每日前沿</h1>
+            <p class="subtitle">Daily Tech Pulse</p>
+            <p class="date">{{ date }}</p>
+        </header>
+
+        <main>
+            <section class="news-list">
+                {% for item in news %}
+                <article class="news-item">
+                    <span class="source-tag {{ item.category }}">{{ item.category }}</span>
+                    <h2><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></h2>
+                    <p class="summary">{{ item.summary }}</p>
+                    <div class="meta">
+                        <span class="source">来源: {{ item.source }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </section>
+        </main>
+
+        <footer>
+            <p>每天精选 3-5 条前沿资讯 | 自动更新</p>
+            <p class="powered">Powered by Claude AI</p>
+        </footer>
+    </div>
+</body>
+</html>
