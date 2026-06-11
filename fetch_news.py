@@ -135,34 +135,26 @@ def fetch_arxiv_ai():
 
 
 def fetch_douyin_hot():
-    """获取抖音热榜"""
-    try:
-        # 使用这个更稳定的API
-        url = "https://tenapi.cn/v2/douyinhot"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        data = response.json()
+    """获取抖音热榜 - 使用多个备用源"""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X_10_15_7) AppleWebKit/537.36"
+    }
 
-        items = []
-        if data.get("code") == 200 and "data" in data:
-            for item in data["data"][:10]:
-                items.append({
-                    "title": item.get("name", item.get("title", "")),
-                    "url": item.get("url", ""),
-                    "summary": f"热度: {item.get('hot', '未知')}",
-                    "source": "抖音热榜",
-                    "category": "hot"
-                })
-        return items
-    except Exception as e:
-        print(f"Douyin Hot error: {e}")
-        # 备用方案：使用微博热搜
+    # 尝试多个API源
+    apis = [
+        # 抖音热榜
+        ("https://tenapi.cn/v2/douyinhot", "抖音热榜"),
+        # 备用：微博热搜
+        ("https://tenapi.cn/v2/weibohot", "微博热搜"),
+        # 备用：知乎热榜
+        ("https://tenapi.cn/v2/zhihuhot", "知乎热榜"),
+    ]
+
+    for url, source_name in apis:
         try:
-            url = "https://tenapi.cn/v2/weibohot"
             response = requests.get(url, headers=headers, timeout=10)
             data = response.json()
+
             items = []
             if data.get("code") == 200 and "data" in data:
                 for item in data["data"][:10]:
@@ -170,13 +162,34 @@ def fetch_douyin_hot():
                         "title": item.get("name", item.get("title", "")),
                         "url": item.get("url", ""),
                         "summary": f"热度: {item.get('hot', '未知')}",
-                        "source": "微博热搜",
+                        "source": source_name,
                         "category": "hot"
                     })
-            return items
-        except Exception as e2:
-            print(f"Weibo Hot fallback error: {e2}")
-            return []
+                if items:
+                    return items
+        except Exception as e:
+            print(f"{source_name} error: {e}")
+            continue
+
+    # 最后备用：使用360热榜
+    try:
+        url = "https://api.oioweb.cn/api/hotsearch?type=douyin"
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+        items = []
+        if data.get("code") == 200 and "data" in data:
+            for item in data["data"][:10]:
+                items.append({
+                    "title": item.get("title", item.get("name", "")),
+                    "url": item.get("url", ""),
+                    "summary": f"热度: {item.get('hot', '未知')}",
+                    "source": "抖音热榜",
+                    "category": "hot"
+                })
+        return items
+    except Exception as e:
+        print(f"360 Hot fallback error: {e}")
+        return []
 
 
 def ai_select_news(candidates):
