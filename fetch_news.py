@@ -135,61 +135,39 @@ def fetch_arxiv_ai():
 
 
 def fetch_douyin_hot():
-    """获取抖音热榜 - 使用多个备用源"""
+    """获取抖音热榜 - 直接抓取网页"""
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X_10_15_7) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X_10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
     }
 
-    # 尝试多个API源
-    apis = [
-        # 抖音热榜
-        ("https://tenapi.cn/v2/douyinhot", "抖音热榜"),
-        # 备用：微博热搜
-        ("https://tenapi.cn/v2/weibohot", "微博热搜"),
-        # 备用：知乎热榜
-        ("https://tenapi.cn/v2/zhihuhot", "知乎热榜"),
-    ]
-
-    for url, source_name in apis:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            data = response.json()
-
-            items = []
-            if data.get("code") == 200 and "data" in data:
-                for item in data["data"][:10]:
-                    items.append({
-                        "title": item.get("name", item.get("title", "")),
-                        "url": item.get("url", ""),
-                        "summary": f"热度: {item.get('hot', '未知')}",
-                        "source": source_name,
-                        "category": "hot"
-                    })
-                if items:
-                    return items
-        except Exception as e:
-            print(f"{source_name} error: {e}")
-            continue
-
-    # 最后备用：使用360热榜
+    # 尝试抓取沸点页面（不需要登录）
     try:
-        url = "https://api.oioweb.cn/api/hotsearch?type=douyin"
-        response = requests.get(url, headers=headers, timeout=10)
+        url = "https://hot.duanzhihua.com/api/douyin"
+        response = requests.get(url, headers=headers, timeout=15, verify=False)
         data = response.json()
+
         items = []
-        if data.get("code") == 200 and "data" in data:
-            for item in data["data"][:10]:
-                items.append({
-                    "title": item.get("title", item.get("name", "")),
-                    "url": item.get("url", ""),
-                    "summary": f"热度: {item.get('hot', '未知')}",
-                    "source": "抖音热榜",
-                    "category": "hot"
-                })
+        for item in data[:10]:
+            items.append({
+                "title": item.get("title", item.get("name", "")),
+                "url": item.get("url", ""),
+                "summary": f"热度: {item.get('hot', item.get('view', '未知'))}",
+                "source": "抖音热榜",
+                "category": "hot"
+            })
         return items
     except Exception as e:
-        print(f"360 Hot fallback error: {e}")
-        return []
+        print(f"Hot list error: {e}")
+        # 最后备用：生成一些静态热点提示
+        return [{
+            "title": "今日热榜数据暂时无法获取",
+            "url": "https://www.douyin.com",
+            "summary": "API服务不稳定，请稍后再试",
+            "source": "系统提示",
+            "category": "hot"
+        }]
 
 
 def ai_select_news(candidates):
