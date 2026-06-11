@@ -166,3 +166,89 @@ footer .powered {
         font-size: 1.1rem;
     }
 }
+
+/* 导航链接 */
+.nav-links {
+    margin-top: 15px;
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.2s;
+}
+
+.nav-links a:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 解读页面样式 */
+.back-link {
+    margin-bottom: 20px;
+}
+
+.back-link a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+.analysis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.analysis-item {
+    padding: 30px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.analysis-item h2 {
+    font-size: 1.5rem;
+    color: #212529;
+    margin-bottom: 10px;
+}
+
+.analysis-item .source-link {
+    margin-bottom: 20px;
+}
+
+.analysis-item .source-link a {
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.analysis-item h3 {
+    font-size: 1.1rem;
+    color: #495057;
+    margin: 20px 0 10px;
+}
+
+.analysis-item p {
+    color: #495057;
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.analysis-item ul {
+    margin: 10px 0 20px 20px;
+    color: #495057;
+}
+
+.analysis-item li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.analysis-item strong {
+    color: #212529;
+}
