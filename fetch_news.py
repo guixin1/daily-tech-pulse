@@ -137,8 +137,8 @@ def fetch_arxiv_ai():
 def fetch_douyin_hot():
     """获取抖音热榜"""
     try:
-        # 使用今日热榜API (通过jsonp方式)
-        url = "https://api.tophub.today/v2/GetAllInfoGzip?id=DqQWprB7p&limit=10"
+        # 使用这个更稳定的API
+        url = "https://tenapi.cn/v2/douyinhot"
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         }
@@ -146,29 +146,37 @@ def fetch_douyin_hot():
         data = response.json()
 
         items = []
-        # 尝试解析数据
-        if isinstance(data, dict) and "data" in data:
+        if data.get("code") == 200 and "data" in data:
             for item in data["data"][:10]:
                 items.append({
-                    "title": item.get("Title", item.get("title", "")),
-                    "url": item.get("Url", item.get("url", "")),
-                    "summary": f"热度: {item.get('Extra', {}).get('hot', item.get('hot', '未知'))}",
-                    "source": "抖音热榜",
-                    "category": "hot"
-                })
-        elif isinstance(data, list):
-            for item in data[:10]:
-                items.append({
-                    "title": item.get("Title", item.get("title", "")),
-                    "url": item.get("Url", item.get("url", "")),
-                    "summary": f"热度: {item.get('Extra', {}).get('hot', item.get('hot', '未知'))}",
+                    "title": item.get("name", item.get("title", "")),
+                    "url": item.get("url", ""),
+                    "summary": f"热度: {item.get('hot', '未知')}",
                     "source": "抖音热榜",
                     "category": "hot"
                 })
         return items
     except Exception as e:
         print(f"Douyin Hot error: {e}")
-        return []
+        # 备用方案：使用微博热搜
+        try:
+            url = "https://tenapi.cn/v2/weibohot"
+            response = requests.get(url, headers=headers, timeout=10)
+            data = response.json()
+            items = []
+            if data.get("code") == 200 and "data" in data:
+                for item in data["data"][:10]:
+                    items.append({
+                        "title": item.get("name", item.get("title", "")),
+                        "url": item.get("url", ""),
+                        "summary": f"热度: {item.get('hot', '未知')}",
+                        "source": "微博热搜",
+                        "category": "hot"
+                    })
+            return items
+        except Exception as e2:
+            print(f"Weibo Hot fallback error: {e2}")
+            return []
 
 
 def ai_select_news(candidates):
