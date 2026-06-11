@@ -97,6 +97,11 @@ main {
     color: #e65100;
 }
 
+.source-tag.hot {
+    background: #ffebee;
+    color: #c62828;
+}
+
 .news-item h2 {
     font-size: 1.25rem;
     line-height: 1.4;

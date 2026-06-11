@@ -134,6 +134,43 @@ def fetch_arxiv_ai():
         return []
 
 
+def fetch_douyin_hot():
+    """获取抖音热榜"""
+    try:
+        # 使用今日热榜API (通过jsonp方式)
+        url = "https://api.tophub.today/v2/GetAllInfoGzip?id=DqQWprB7p&limit=10"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+
+        items = []
+        # 尝试解析数据
+        if isinstance(data, dict) and "data" in data:
+            for item in data["data"][:10]:
+                items.append({
+                    "title": item.get("Title", item.get("title", "")),
+                    "url": item.get("Url", item.get("url", "")),
+                    "summary": f"热度: {item.get('Extra', {}).get('hot', item.get('hot', '未知'))}",
+                    "source": "抖音热榜",
+                    "category": "hot"
+                })
+        elif isinstance(data, list):
+            for item in data[:10]:
+                items.append({
+                    "title": item.get("Title", item.get("title", "")),
+                    "url": item.get("Url", item.get("url", "")),
+                    "summary": f"热度: {item.get('Extra', {}).get('hot', item.get('hot', '未知'))}",
+                    "source": "抖音热榜",
+                    "category": "hot"
+                })
+        return items
+    except Exception as e:
+        print(f"Douyin Hot error: {e}")
+        return []
+
+
 def ai_select_news(candidates):
     """使用 Claude AI 筛选最有价值的消息"""
     if not candidates:
@@ -150,16 +187,17 @@ def ai_select_news(candidates):
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    prompt = f"""你是一个科技资讯编辑。请从以下候选消息中筛选出 3-5 条最有价值、最前沿的消息。
+    prompt = f"""你是一个科技资讯编辑。请从以下候选消息中筛选出 5-8 条最有价值、最前沿的消息。
 
 候选消息:
 {json.dumps(candidates, ensure_ascii=False, indent=2)}
 
 筛选标准:
-1. 选择对技术人员最有价值的内容
+1. 选择对读者最有价值的内容
 2. 优先选择突破性、创新性的消息
-3. 保持领域多样性（AI、开发、创业、科技）
-4. **标题和摘要必须翻译成中文**
+3. 保持领域多样性（AI、开发、创业、科技、热点）
+4. 抖音热榜选择2-3条最有意思的
+5. **标题和摘要必须翻译成中文**
 
 返回 JSON 格式:
 {{
@@ -214,6 +252,7 @@ def main():
     all_news.extend(fetch_github_trending())
     all_news.extend(fetch_producthunt())
     all_news.extend(fetch_arxiv_ai())
+    all_news.extend(fetch_douyin_hot())
 
     print(f"Total candidates: {len(all_news)}")
 
